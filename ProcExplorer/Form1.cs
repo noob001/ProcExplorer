@@ -7,6 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
+using WorkPart;
 
 namespace ProcExplorer
 {
@@ -15,6 +16,22 @@ namespace ProcExplorer
         public Form1()
         {
             InitializeComponent();
+        }
+
+        private void refresh_Click(object sender, EventArgs e)
+        {
+            GetProcInformation.InitializeProcInf();
+            foreach (GetProcInformation inf in GetProcInformation.ProcInfList)
+            {
+                ProcDataGrid.Rows.Add(inf.GetProcName(), inf.GetProcID(), inf.GetProcFullName(), inf.GetProcOwner(), inf.GetProcType());
+
+            }
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
         }
     }
 }
