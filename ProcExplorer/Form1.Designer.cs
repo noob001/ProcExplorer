@@ -28,8 +28,8 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.refresh = new System.Windows.Forms.Button();
-            this.button2 = new System.Windows.Forms.Button();
+            this.Refresh = new System.Windows.Forms.Button();
+            this.Modules = new System.Windows.Forms.Button();
             this.label1 = new System.Windows.Forms.Label();
             this.ProcDataGrid = new System.Windows.Forms.DataGridView();
             this.PName = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -40,24 +40,25 @@
             ((System.ComponentModel.ISupportInitialize)(this.ProcDataGrid)).BeginInit();
             this.SuspendLayout();
             // 
-            // refresh
+            // Refresh
             // 
-            this.refresh.Location = new System.Drawing.Point(12, 12);
-            this.refresh.Name = "refresh";
-            this.refresh.Size = new System.Drawing.Size(72, 23);
-            this.refresh.TabIndex = 0;
-            this.refresh.Text = "refresh";
-            this.refresh.UseVisualStyleBackColor = true;
-            this.refresh.Click += new System.EventHandler(this.refresh_Click);
+            this.Refresh.Location = new System.Drawing.Point(12, 12);
+            this.Refresh.Name = "Refresh";
+            this.Refresh.Size = new System.Drawing.Size(72, 23);
+            this.Refresh.TabIndex = 0;
+            this.Refresh.Text = "Refresh";
+            this.Refresh.UseVisualStyleBackColor = true;
+            this.Refresh.Click += new System.EventHandler(this.refresh_Click);
             // 
-            // button2
+            // Modules
             // 
-            this.button2.Location = new System.Drawing.Point(12, 58);
-            this.button2.Name = "button2";
-            this.button2.Size = new System.Drawing.Size(72, 23);
-            this.button2.TabIndex = 1;
-            this.button2.Text = "button2";
-            this.button2.UseVisualStyleBackColor = true;
+            this.Modules.Location = new System.Drawing.Point(12, 58);
+            this.Modules.Name = "Modules";
+            this.Modules.Size = new System.Drawing.Size(72, 23);
+            this.Modules.TabIndex = 1;
+            this.Modules.Text = "Modules";
+            this.Modules.UseVisualStyleBackColor = true;
+            this.Modules.Click += new System.EventHandler(this.Modules_Click);
             // 
             // label1
             // 
@@ -88,10 +89,11 @@
             this.Type});
             this.ProcDataGrid.Location = new System.Drawing.Point(404, 12);
             this.ProcDataGrid.MaximumSize = new System.Drawing.Size(2000, 1000);
+            this.ProcDataGrid.MultiSelect = false;
             this.ProcDataGrid.Name = "ProcDataGrid";
             this.ProcDataGrid.ReadOnly = true;
-            this.ProcDataGrid.RowHeadersVisible = false;
             this.ProcDataGrid.RowTemplate.Height = 24;
+            this.ProcDataGrid.SelectionMode = System.Windows.Forms.DataGridViewSelectionMode.FullRowSelect;
             this.ProcDataGrid.Size = new System.Drawing.Size(764, 485);
             this.ProcDataGrid.TabIndex = 4;
             // 
@@ -135,8 +137,8 @@
             this.ClientSize = new System.Drawing.Size(1180, 569);
             this.Controls.Add(this.ProcDataGrid);
             this.Controls.Add(this.label1);
-            this.Controls.Add(this.button2);
-            this.Controls.Add(this.refresh);
+            this.Controls.Add(this.Modules);
+            this.Controls.Add(this.Refresh);
             this.Name = "Form1";
             this.Text = "Form1";
             this.Load += new System.EventHandler(this.Form1_Load);
@@ -148,8 +150,8 @@
 
         #endregion
 
-        private System.Windows.Forms.Button refresh;
-        private System.Windows.Forms.Button button2;
+        private System.Windows.Forms.Button Refresh;
+        private System.Windows.Forms.Button Modules;
         private System.Windows.Forms.Label label1;
         private System.Windows.Forms.DataGridView ProcDataGrid;
         private System.Windows.Forms.DataGridViewTextBoxColumn PName;

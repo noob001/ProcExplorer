@@ -20,6 +20,23 @@ namespace ProcExplorer
 
         private void refresh_Click(object sender, EventArgs e)
         {
+            RefreshTable();
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+            RefreshTable();
+        }
+        private void Modules_Click(object sender, EventArgs e)
+        {
+            ViewModules();
+        }
+
+
+        private void RefreshTable ()
+        {
+            ProcDataGrid.Rows.Clear();
             GetProcInformation.InitializeProcInf();
             foreach (GetProcInformation inf in GetProcInformation.ProcInfList)
             {
@@ -29,9 +46,11 @@ namespace ProcExplorer
 
         }
 
-        private void Form1_Load(object sender, EventArgs e)
+        private void ViewModules()
         {
-
+            Form2 form = new Form2(ProcDataGrid.CurrentRow.Index);
+            form.ShowDialog();
         }
+
     }
 }

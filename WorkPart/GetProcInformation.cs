@@ -6,6 +6,8 @@ using System.Threading.Tasks;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
+using System.Management;
+
 
 namespace WorkPart
 {
@@ -43,7 +45,7 @@ namespace WorkPart
         }
         #endregion
 
-        private int ProcNumber { get; set; }
+        public int ProcNumber { get; set; }
 
         #region GetInfo
 
@@ -68,6 +70,10 @@ namespace WorkPart
             {
                 return "Acess_denied";
             }
+            catch (InvalidOperationException)
+            {
+                return "Process_End";
+            }
 
             }
         
@@ -82,13 +88,54 @@ namespace WorkPart
             {
                 return "Acess_denied";
             }
+            catch (InvalidOperationException)
+            {
+                return "Process_End";
+            }
+
+
         }
 
         public string GetProcOwner()
         {
+            var query = string.Format("SELECT ProcessId FROM Win32_Process WHERE ParentProcessId = {0}", GetProcID());
+            var search = new ManagementObjectSearcher("root\\CIMV2", query);
+            foreach (var ParentResult in search.Get())
+            {
+                try
+                {
+                    var ParentId = (uint)ParentResult["ProcessID"];
+                    Process Parent = Process.GetProcessById((int)ParentId);
+                    return Parent.ProcessName;
+                }
+                catch(ManagementException)
+                {
+                    return "NoOwner";
+                }
+            }
+
+
             return "getprocowner";
         }
 
+        public List <string> GetModuleNames()
+        {
+            List <string> mList = new List<string>();
+            try
+            {
+                foreach (ProcessModule pm in ProcList[ProcNumber].Modules)
+                {
+                    mList.Add(pm.ModuleName);
+                }
+                return mList;
+            }
+
+            catch (Win32Exception)
+            {
+                mList.Add("Acess_denied");
+                return mList;
+            }
+        }
 
        /* public ProcInf GetInfForRow()
         {
