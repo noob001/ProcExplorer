@@ -28,11 +28,11 @@ namespace ProcExplorer
         {
             RefreshTable();
         }
+
         private void Modules_Click(object sender, EventArgs e)
         {
             ViewModules();
         }
-
 
         private void RefreshTable ()
         {
@@ -40,7 +40,7 @@ namespace ProcExplorer
             GetProcInformation.InitializeProcInf();
             foreach (GetProcInformation inf in GetProcInformation.ProcInfList)
             {
-                ProcDataGrid.Rows.Add(inf.GetProcName(), inf.GetProcID(), inf.GetProcFullName(), inf.GetProcOwner(), inf.GetProcType());
+                ProcDataGrid.Rows.Add(inf.GetProcName(), inf.GetProcID(), inf.GetProcFullName(), inf.GetProcType());
 
             }
 
@@ -52,5 +52,22 @@ namespace ProcExplorer
             form.ShowDialog();
         }
 
+        private void ProcDataGrid_SelectionChanged(object sender, EventArgs e)
+        {
+            //magicbutton!!!
+            string name;
+            int parPID;
+            ParentName.Text = GetProcInformation.ProcInfList[ProcDataGrid.CurrentRow.Index].GetProcParentName(out parPID);
+            ParentId.Text = parPID.ToString();
+            SidInfo.Text = GetProcInformation.ProcInfList[ProcDataGrid.CurrentRow.Index].GetProcOwnerSidName(out name);
+            OwnerName.Text = name;
+        }
+
+        private void OwnerName_Click(object sender, EventArgs e)
+        {
+
+        }
     }
+
 }
+

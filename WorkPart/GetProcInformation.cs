@@ -7,12 +7,32 @@ using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.ComponentModel;
 using System.Management;
-
+using zmland.Win32;
+using System.Security.Principal;
 
 namespace WorkPart
 {
     public partial class GetProcInformation
     {
+        #region Import
+        // Для ASLR
+        [DllImport("kernel32.dll")]
+        static extern bool GetProcessMitigationPolicy(
+            IntPtr hProcess,
+            Process_Mitigation_Policy mitigationPolicy,
+            ref ProcessDEP lpBuffer,
+            int dwLength);
+
+        // Для DEP
+        [DllImport("kernel32.dll")]
+        static extern bool GetProcessMitigationPolicy(
+            IntPtr hProcess,
+            Process_Mitigation_Policy mitigationPolicy,
+            ref ProcessASLR lpBuffer,
+            int dwLength);
+
+        #endregion
+
         #region Static Props&Methods
 
         private static List<Process> ProcList { get; set; }
@@ -38,7 +58,7 @@ namespace WorkPart
 
         #endregion
 
-        #region constr
+        #region construct
         public GetProcInformation(int number)
         {
             ProcNumber = number;
@@ -81,9 +101,10 @@ namespace WorkPart
         {
             try
             {
-                return Marshal.SizeOf(ProcList[ProcNumber].SafeHandle.DangerousGetHandle()).ToString();
+                int is64 = 0;
+                NativeMethods.IsWow64Process(ProcList[ProcNumber].Handle, out is64);
+                return is64==0 ? "64bit": "32bit" ;
             }
-
             catch (Win32Exception e)
             {
                 return "Acess_denied";
@@ -92,30 +113,58 @@ namespace WorkPart
             {
                 return "Process_End";
             }
-
-
         }
 
-        public string GetProcOwner()
+       /* public string GetProcOwner()
         {
-            var query = string.Format("SELECT ProcessId FROM Win32_Process WHERE ParentProcessId = {0}", GetProcID());
-            var search = new ManagementObjectSearcher("root\\CIMV2", query);
-            foreach (var ParentResult in search.Get())
+           string[] propertiesToSelect = new[] { "Handle", "ProcessId" };
+            string queryPartStr = "Name = '" +ProcInfList[ProcNumber].GetProcName()+ ".exe'";
+            SelectQuery processQuery = new SelectQuery("Win32_Process", queryPartStr, propertiesToSelect);
+   
+            using (ManagementObjectSearcher searcher = new ManagementObjectSearcher(processQuery))
+            using (ManagementObjectCollection processes = searcher.Get())
+                foreach (ManagementObject process in processes)
+                {
+                    object[] outParameters = new object[2];
+                    uint result = (uint)process.InvokeMethod("GetOwner", outParameters);
+
+                    if (result == 0)
+                    {
+                        string user = (string)outParameters[0];
+                        string domain = (string)outParameters[1];
+                        uint processId = (uint)process["ProcessId"];
+                        return user;
+                        // Use process data...
+                    }
+                    else
+                    {
+                        return "NoOwnerInformation";
+                    }
+                }
+            return "System";
+        }*/
+
+        public string GetProcOwnerSidName(out string name)
+        {
+            try
             {
-                try
-                {
-                    var ParentId = (uint)ParentResult["ProcessID"];
-                    Process Parent = Process.GetProcessById((int)ParentId);
-                    return Parent.ProcessName;
-                }
-                catch(ManagementException)
-                {
-                    return "NoOwner";
-                }
+                IntPtr procHandle = IntPtr.Zero;
+                NativeMethods.OpenProcessToken(ProcList[ProcNumber].Handle, 8, out procHandle);
+                WindowsIdentity user = new WindowsIdentity(procHandle);
+                name = user.Name;
+                return "{" + user.User.Value + "}";
+            }
+            catch (Win32Exception e)
+            {
+                name = "acess_denied";
+                return "Acess_denied";
+            }
+            catch (InvalidOperationException)
+            {
+                name = "ProcessName";
+                return "Process_End";                
             }
 
-
-            return "getprocowner";
         }
 
         public List <string> GetModuleNames()
@@ -137,13 +186,76 @@ namespace WorkPart
             }
         }
 
+        public string GetProcParentName(out int ParentPID)
+        {
+            try
+            { 
+            PerformanceCounter parentInf = new PerformanceCounter("Process", "Creating Process ID", ProcInfList[ProcNumber].GetProcName());
+            
+            ParentPID =  (int)parentInf.NextValue();
+            string procParentName = Process.GetProcessById(ParentPID).ProcessName;
+            return procParentName;
+            }
+            catch (Win32Exception e)
+            {
+                ParentPID = 0;
+                return "Acess_denied";
+            }
+            catch (Exception)
+            {
+                ParentPID = 0;
+                return "Process_End";
+            }
+
+        }
+
+        public bool GetAslrPolicy (out string bottomUpRandomization, out string forceRelocateImages, out string highEntropy, out string disallowStrippedImages)
+            { 
+
+            }
+        
+
        /* public ProcInf GetInfForRow()
         {
             return new ProcInf(GetProcName(), GetProcID()," GetProcFullName()"," ", GetProcType());
-        }
+        
         */
         #endregion
 
+
+
+    }
+
+
+    struct ProcessASLR
+    {
+        public uint Flags;
+        public bool EnableBottomUpRandomization { get { return (Flags & 1) > 0; } }
+        public bool EnableForceRelocateImages { get { return (Flags & 2) > 0; } }
+        public bool EnableHighEntropy { get { return (Flags & 4) > 0; } }
+        public bool DisallowStrippedImages { get { return (Flags & 8) > 0; } }
+    }
+
+    struct ProcessDEP
+    {
+        uint Flags;
+        bool Permanent;
+
+        bool Enable
+        {
+            get { return (Flags & 1) > 0; }
+        }
+
+        bool DisableAtlThunkEmulation
+        {
+            get { return (Flags & 2) > 0; }
+        }
+    }
+
+    public enum Process_Mitigation_Policy
+    {
+        ProcessDEPPolicy = 0,
+        ProcessASLRPolicy = 1
     }
 
     public struct ProcInf
