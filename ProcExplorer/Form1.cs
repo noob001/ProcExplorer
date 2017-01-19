@@ -40,7 +40,17 @@ namespace ProcExplorer
             GetProcInformation.InitializeProcInf();
             foreach (GetProcInformation inf in GetProcInformation.ProcInfList)
             {
-                ProcDataGrid.Rows.Add(inf.GetProcName(), inf.GetProcID(), inf.GetProcFullName(), inf.GetProcType());
+                string t = "";
+                try
+                {
+                    t = inf.GetProcessIntegrityLevel().ToString();
+                }
+                catch (Exception tre)
+                {
+                    t = tre.Message;
+                }
+                ProcDataGrid.Rows.Add(inf.GetProcName(), inf.GetProcID(), inf.GetProcFullName(), inf.GetProcType(), t);
+                
 
             }
 
@@ -57,13 +67,60 @@ namespace ProcExplorer
             //magicbutton!!!
             string name;
             int parPID;
+            string bottomUpRandomization;
+            string forceRelocateImages;
+            string highEntropy;
+            string disallowStrippedImages;
+
             ParentName.Text = GetProcInformation.ProcInfList[ProcDataGrid.CurrentRow.Index].GetProcParentName(out parPID);
             ParentId.Text = parPID.ToString();
             SidInfo.Text = GetProcInformation.ProcInfList[ProcDataGrid.CurrentRow.Index].GetProcOwnerSidName(out name);
             OwnerName.Text = name;
+            DEP.Text = GetProcInformation.ProcInfList[ProcDataGrid.CurrentRow.Index].GetDepPolicy();
+            GetProcInformation.ProcInfList[ProcDataGrid.CurrentRow.Index].GetAslrPolicy(out bottomUpRandomization, out forceRelocateImages, out highEntropy, out disallowStrippedImages);
+            BottomUpRandomization.Text= bottomUpRandomization;
+            ForceRelocateImages.Text= forceRelocateImages;
+            HighEntropy.Text = highEntropy;
+            DisallowStrippedImages.Text = disallowStrippedImages;
+            try
+            {
+                IntegrityLvl.Text = GetProcInformation.ProcInfList[ProcDataGrid.CurrentRow.Index].GetProcessIntegrityLevel().ToString();
+            }
+
+            catch(Exception tre)
+            {
+                IntegrityLvl.Text = tre.Message;
+            }
+
         }
 
-        private void OwnerName_Click(object sender, EventArgs e)
+        private void forceRelocateImagesLbl_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label12_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void groupsButton_Click(object sender, EventArgs e)
+        {
+            Form3 form = new Form3();
+            form.ShowDialog();
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void ProcDataGrid_CellContentClick(object sender, DataGridViewCellEventArgs e)
         {
 
         }

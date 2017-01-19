@@ -60,12 +60,17 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="GetProcInformation.cs" />
+    <Compile Include="GetProcIntwgrity.cs" />
+    <Compile Include="GetUserInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <Reference Include="System" />
+    <Reference Include="System.DirectoryServices" />
     <Reference Include="System.Management" />
-    <Reference Include="zmland.Win32, Version=1.1.2.37856, Culture=neutral, processorArchitecture=MSIL">
-      <HintPath>..\packages\zmland.Win32.1.1.2.37856\lib\net452\zmland.Win32.dll</HintPath>
+    <Reference Include="System.Windows" />
+    <Reference Include="WindowsBase" />
+    <Reference Include="zmland.Win32, Version=1.1.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <HintPath>..\packages\zmland.Win32.1.1.4.0\lib\net452\zmland.Win32.dll</HintPath>
       <Private>True</Private>
     </Reference>
   </ItemGroup>
