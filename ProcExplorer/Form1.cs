@@ -124,6 +124,12 @@ namespace ProcExplorer
         {
 
         }
+
+        private void ChangeIntegrity_Click(object sender, EventArgs e)
+        {
+            Form4 form = new Form4(ProcDataGrid.CurrentRow.Index);
+            form.ShowDialog();
+        }
     }
 
 }

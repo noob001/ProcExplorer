@@ -248,6 +248,7 @@ namespace WorkPart
 
         #endregion
 
+        const long SECURITY_MANDATORY_LABEL_AUTHORITY = 0x3000;
         const uint ERROR_INSUFFICIENT_BUFFER = 122;
         const long SECURITY_MANDATORY_UNTRUSTED_RID = 0x00000000L;
         const long SECURITY_MANDATORY_LOW_RID = 0x00001000L;
@@ -285,80 +286,21 @@ namespace WorkPart
             uint TokenInformationLength,
             out uint ReturnLength);
 
+
+        [DllImport("advapi32.dll", SetLastError = true)]
+        static extern bool SetTokenInformation(IntPtr TokenHandle,
+            TOKEN_INFORMATION_CLASS TokenInformationClass,
+            IntPtr TokenInformation,
+            uint TokenInformationLength);
+
         [DllImport("kernel32.dll")]
         static extern IntPtr LocalAlloc(uint uFlags, UIntPtr uBytes);
 
         [DllImport("advapi32.dll", SetLastError = true)]
         static extern IntPtr GetSidSubAuthority(IntPtr pSid, int nSubAuthority);
 
-        [DllImport("advapi32.dll", SetLastError = true)]
-        static extern IntPtr GetSidSubAuthorityCount(IntPtr pSid);
-
-        public string GetProcIntgLvl( )
-        {
-            IntPtr hProcess = ProcList[ProcNumber].Handle;
-            IntPtr hToken;
-            uint dwError=0;
-            IntPtr pTIL;
-            TOKEN_MANDATORY_LABEL TIL;
-            string d = "no inf";
-
-            if (!OpenProcessToken(hProcess, TokenAccessLevels.MaximumAllowed, out hToken))
-            {
-                return d;
-            }
-                uint dwLengthNeeded;
-                if (GetTokenInformation(hToken,TOKEN_INFORMATION_CLASS.TokenIntegrityLevel,IntPtr.Zero, 0, out dwLengthNeeded))
-                    dwError = (uint)Marshal.GetLastWin32Error();
-
-                if (dwError == ERROR_INSUFFICIENT_BUFFER)
-                {
-                    pTIL = Marshal.AllocHGlobal((int)dwLengthNeeded);
-
-                        if (!GetTokenInformation(hToken,TOKEN_INFORMATION_CLASS.TokenIntegrityLevel,pTIL,dwLengthNeeded,out dwLengthNeeded))
-                        {
-                            d="no info5";
-                        }
-
-                        TIL =(TOKEN_MANDATORY_LABEL)Marshal.PtrToStructure(pTIL,typeof(TOKEN_MANDATORY_LABEL));
-
-                        IntPtr SubAuthorityCount = GetSidSubAuthorityCount(TIL.Label.Sid);
-
-                        IntPtr IntegrityLevelPtr = GetSidSubAuthority(TIL.Label.Sid,
-                            Marshal.ReadByte(SubAuthorityCount) - 1);
-
-                        int dwIntegrityLevel = Marshal.ReadInt32(IntegrityLevelPtr);
-
-                        if (dwIntegrityLevel == SECURITY_MANDATORY_LOW_RID)
-                        {
-                            // Untrusted Integrity
-                            d = "Untrusted Process";
-                        }
-                         else if(dwIntegrityLevel == SECURITY_MANDATORY_LOW_RID)
-                        {
-                            // Low Integrity
-                            d= "Low Process";
-                        }
-                        else if (dwIntegrityLevel >= SECURITY_MANDATORY_MEDIUM_RID)
-                        {
-                            // Medium Integrity
-                            d= "Medium Process";
-                        }
-                        else if (dwIntegrityLevel >= SECURITY_MANDATORY_HIGH_RID )
-                        {
-                            // High Integrity
-                            d= "High Integrity Process";
-                        }
-                        else if (dwIntegrityLevel >= SECURITY_MANDATORY_SYSTEM_RID)
-                        {
-                            // System Integrity
-                            d = "System Integrity Process";
-                        }
-
-                }
-                CloseHandle(hToken);
-            return d;
-        }
+        [DllImport("ntdll", CharSet = CharSet.Auto, ExactSpelling = true, SetLastError = true)]
+        private static extern Int32 RtlInitializeSid([In, Out] ref SID Sid, [In] ref SID_IDENTIFIER_AUTHORITY IdentifierAuthority, byte SubAuthorityCount);
 
 
         public string GetProcessIntegrityLevel()
@@ -433,6 +375,7 @@ namespace WorkPart
                     // System Integrity
                     d = "System Integrity Process";
                 }
+                d += cbTokenIL.ToString();
 
 
             }
@@ -454,8 +397,9 @@ namespace WorkPart
 
             return d;
         }
-    }
 
+    }
+    
 
     struct ProcessASLR
     {

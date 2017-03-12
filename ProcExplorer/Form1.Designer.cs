@@ -32,6 +32,11 @@
             this.Modules = new System.Windows.Forms.Button();
             this.parentlbl = new System.Windows.Forms.Label();
             this.ProcDataGrid = new System.Windows.Forms.DataGridView();
+            this.PName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.PFullName = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Integrity = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.ParentName = new System.Windows.Forms.Label();
             this.SidInfo = new System.Windows.Forms.Label();
             this.SidLbl = new System.Windows.Forms.Label();
@@ -53,11 +58,7 @@
             this.groupsButton = new System.Windows.Forms.Button();
             this.IntegrityLvl = new System.Windows.Forms.Label();
             this.IntegrityLvlLbl = new System.Windows.Forms.Label();
-            this.PName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.ID = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.PFullName = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Type = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Integrity = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.ChangeIntegrity = new System.Windows.Forms.Button();
             ((System.ComponentModel.ISupportInitialize)(this.ProcDataGrid)).BeginInit();
             this.SuspendLayout();
             // 
@@ -120,6 +121,38 @@
             this.ProcDataGrid.TabIndex = 4;
             this.ProcDataGrid.CellContentClick += new System.Windows.Forms.DataGridViewCellEventHandler(this.ProcDataGrid_CellContentClick);
             this.ProcDataGrid.SelectionChanged += new System.EventHandler(this.ProcDataGrid_SelectionChanged);
+            // 
+            // PName
+            // 
+            this.PName.HeaderText = "PName";
+            this.PName.Name = "PName";
+            this.PName.ReadOnly = true;
+            this.PName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            // 
+            // ID
+            // 
+            this.ID.HeaderText = "PID";
+            this.ID.Name = "ID";
+            this.ID.ReadOnly = true;
+            // 
+            // PFullName
+            // 
+            this.PFullName.HeaderText = "PFullName";
+            this.PFullName.Name = "PFullName";
+            this.PFullName.ReadOnly = true;
+            // 
+            // Type
+            // 
+            this.Type.HeaderText = "Type";
+            this.Type.Name = "Type";
+            this.Type.ReadOnly = true;
+            this.Type.Resizable = System.Windows.Forms.DataGridViewTriState.True;
+            // 
+            // Integrity
+            // 
+            this.Integrity.HeaderText = "Integrity";
+            this.Integrity.Name = "Integrity";
+            this.Integrity.ReadOnly = true;
             // 
             // ParentName
             // 
@@ -305,43 +338,22 @@
             this.IntegrityLvlLbl.Text = "IntegrityLvl";
             this.IntegrityLvlLbl.Click += new System.EventHandler(this.label2_Click);
             // 
-            // PName
+            // ChangeIntegrity
             // 
-            this.PName.HeaderText = "PName";
-            this.PName.Name = "PName";
-            this.PName.ReadOnly = true;
-            this.PName.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            // 
-            // ID
-            // 
-            this.ID.HeaderText = "PID";
-            this.ID.Name = "ID";
-            this.ID.ReadOnly = true;
-            // 
-            // PFullName
-            // 
-            this.PFullName.HeaderText = "PFullName";
-            this.PFullName.Name = "PFullName";
-            this.PFullName.ReadOnly = true;
-            // 
-            // Type
-            // 
-            this.Type.HeaderText = "Type";
-            this.Type.Name = "Type";
-            this.Type.ReadOnly = true;
-            this.Type.Resizable = System.Windows.Forms.DataGridViewTriState.True;
-            // 
-            // Integrity
-            // 
-            this.Integrity.HeaderText = "Integrity";
-            this.Integrity.Name = "Integrity";
-            this.Integrity.ReadOnly = true;
+            this.ChangeIntegrity.Location = new System.Drawing.Point(103, 58);
+            this.ChangeIntegrity.Name = "ChangeIntegrity";
+            this.ChangeIntegrity.Size = new System.Drawing.Size(72, 23);
+            this.ChangeIntegrity.TabIndex = 26;
+            this.ChangeIntegrity.Text = "ChngInL";
+            this.ChangeIntegrity.UseVisualStyleBackColor = true;
+            this.ChangeIntegrity.Click += new System.EventHandler(this.ChangeIntegrity_Click);
             // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(8F, 16F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(1180, 569);
+            this.Controls.Add(this.ChangeIntegrity);
             this.Controls.Add(this.IntegrityLvl);
             this.Controls.Add(this.IntegrityLvlLbl);
             this.Controls.Add(this.groupsButton);
@@ -408,6 +420,7 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn PFullName;
         private System.Windows.Forms.DataGridViewTextBoxColumn Type;
         private System.Windows.Forms.DataGridViewTextBoxColumn Integrity;
+        private System.Windows.Forms.Button ChangeIntegrity;
     }
 }
 
