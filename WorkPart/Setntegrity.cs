@@ -1,94 +1,90 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Diagnostics;
-using System.Runtime.InteropServices;
 using System.ComponentModel;
-using System.Management;
-using zmland.Win32;
-using System.Security.Principal;
+using System.Runtime.InteropServices;
+using CSCreateLowIntegrityProcess;
 
 namespace WorkPart
 {
-
-
-    enum MANDATORY_LEVEL
-    {
-        MandatoryLevelUntrusted = 0,
-        MandatoryLevelLow,
-        MandatoryLevelMedium,
-        MandatoryLevelHigh,
-        MandatoryLevelSystem,
-        MandatoryLevelSecureProcess,
-        MandatoryLevelCount
-    };
-    
-
-
-
-
-
-
-
     public partial class GetProcInformation
     {
-        public bool SetProcessIntegrityLevel(int integrityLvl = (0x00000000))
+        public void SetProcessIntegrityLevel(int level)
+        {
+            NativeHelper.SetProcessIntegrityLevel(ProcList[ProcNumber].Handle, (NativeHelper.MANDATORY_LEVEL) level);
+        }
+    }
+
+    public class NativeHelper
+    {
+        public enum MANDATORY_LEVEL
+        {
+            SECURITY_MANDATORY_UNTRUSTED_RID,
+            SECURITY_MANDATORY_LOW_RID,
+            SECURITY_MANDATORY_MEDIUM_RID,
+            SECURITY_MANDATORY_HIGH_RID,
+            SECURITY_MANDATORY_SYSTEM_RID
+        }
+
+        public static bool SetProcessIntegrityLevel(IntPtr provessHandle, MANDATORY_LEVEL integrityLvl)
         {
             bool isok = false;
-            int IL = -1;
-            IntPtr hToken = IntPtr.Zero;
-            uint cbTokenIL = 0;
-            IntPtr pTokenIL = IntPtr.Zero;
+            SafeTokenHandle hToken = null;
+            IntPtr pIntegritySid = IntPtr.Zero;
+            int cbTokenInfo = 0;
+            IntPtr pTokenInfo = IntPtr.Zero;
 
             try
             {
-                if (!OpenProcessToken(ProcList[ProcNumber].Handle, TokenAccessLevels.Query, out hToken))
+                if (!NativeMethod.OpenProcessToken(provessHandle,
+                    NativeMethod.TOKEN_QUERY | NativeMethod.TOKEN_ADJUST_DEFAULT, out hToken))
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
-                }
-                if (!GetTokenInformation(hToken, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, IntPtr.Zero, 0, out cbTokenIL))
-                {
-                    int error = Marshal.GetLastWin32Error();
-                    if (error != ERROR_INSUFFICIENT_BUFFER)
-                    {
-
-                        throw new Win32Exception(error);
-                    }
+                    throw new Win32Exception();
                 }
 
-                pTokenIL = Marshal.AllocHGlobal((int)cbTokenIL);
-                if (pTokenIL == IntPtr.Zero)
+                // Create the low integrity SID.
+                if (!NativeMethod.AllocateAndInitializeSid(
+                    ref NativeMethod.SECURITY_MANDATORY_LABEL_AUTHORITY, 1,
+                    (int) integrityLvl,
+                    0, 0, 0, 0, 0, 0, 0, out pIntegritySid))
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                    throw new Win32Exception();
                 }
 
-                if (!GetTokenInformation(hToken, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, pTokenIL, cbTokenIL, out cbTokenIL))
+                TOKEN_MANDATORY_LABEL tml;
+                tml.Label.Attributes = NativeMethod.SE_GROUP_INTEGRITY;
+                tml.Label.Sid = pIntegritySid;
+
+                // Marshal the TOKEN_MANDATORY_LABEL struct to the native memory.
+                cbTokenInfo = Marshal.SizeOf(tml);
+                pTokenInfo = Marshal.AllocHGlobal(cbTokenInfo);
+                Marshal.StructureToPtr(tml, pTokenInfo, false);
+
+                // Set the integrity level in the access token to low.
+                if (!NativeMethod.SetTokenInformation(hToken,
+                    CSCreateLowIntegrityProcess.TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, pTokenInfo,
+                    cbTokenInfo + NativeMethod.GetLengthSid(pIntegritySid)))
                 {
-                    throw new Win32Exception(Marshal.GetLastWin32Error());
+                    throw new Win32Exception();
                 }
-
-                
-
-                SetTokenInformation(hToken, TOKEN_INFORMATION_CLASS.TokenIntegrityLevel, pTokenIL, cbTokenIL);
-
+                isok = true;
             }
-
-
             finally
             {
-
+                // Centralized cleanup for all allocated resources. 
                 if (hToken != null)
                 {
-                    CloseHandle(hToken);
-                    hToken = IntPtr.Zero;
+                    hToken.Close();
+                    hToken = null;
                 }
-                if (pTokenIL != IntPtr.Zero)
+                if (pIntegritySid != IntPtr.Zero)
                 {
-                    Marshal.FreeHGlobal(pTokenIL);
-                    pTokenIL = IntPtr.Zero;
-                    cbTokenIL = 0;
+                    NativeMethod.FreeSid(pIntegritySid);
+                    pIntegritySid = IntPtr.Zero;
+                }
+                if (pTokenInfo != IntPtr.Zero)
+                {
+                    Marshal.FreeHGlobal(pTokenInfo);
+                    pTokenInfo = IntPtr.Zero;
+                    cbTokenInfo = 0;
                 }
             }
             return isok;
